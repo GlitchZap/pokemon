@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getStudentDocuments, uploadStudentDocument } from '../../services/api';
 
 const DocumentUpload = () => {
   const { currentUser } = useAuth();
@@ -12,7 +13,7 @@ const DocumentUpload = () => {
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   
   // Current date and user information
-  const currentDateTime = "2025-03-05 18:57:38";
+  const currentDateTime = "2025-03-06 07:40:57";
   const currentUserLogin = "GlitchZap";
 
   const documentTypes = [
@@ -28,22 +29,17 @@ const DocumentUpload = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call with timeout
+    // Fetch documents from the API
     const fetchDocuments = async () => {
       try {
         setLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock documents data
-        const mockDocuments = [
-          { document_id: 1, document_type: "Aadhar Card", file_name: "aadhar_card.pdf", upload_date: "2025-02-10" },
-          { document_id: 2, document_type: "Birth Certificate", file_name: "birth_certificate.jpg", upload_date: "2025-02-12" },
-          { document_id: 3, document_type: "Previous School Records", file_name: "school_records.pdf", upload_date: "2025-02-15" },
-        ];
-        
-        setDocuments(mockDocuments);
-        setError(null);
+        if (currentUser && currentUser.id) {
+          const documentsData = await getStudentDocuments(currentUser.id);
+          setDocuments(documentsData || []);
+          setError(null);
+        } else {
+          setError('User information not available');
+        }
       } catch (err) {
         console.error('Error fetching documents:', err);
         setError('Failed to load document list. Please try again later.');
@@ -53,7 +49,7 @@ const DocumentUpload = () => {
     };
 
     fetchDocuments();
-  }, []);
+  }, [currentUser]);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -77,29 +73,36 @@ const DocumentUpload = () => {
     
     try {
       setUploading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Mock successful upload
-      const newDocument = {
-        document_id: documents.length + 1,
-        document_type: documentType,
-        file_name: selectedFile.name,
-        upload_date: currentDateTime.split(' ')[0]
-      };
+      // Create form data for upload
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('documentType', documentType);
+      formData.append('fileName', selectedFile.name);
       
-      setDocuments([newDocument, ...documents]);
-      
-      // Reset form
-      setSelectedFile(null);
-      setDocumentType('');
-      document.getElementById('file-upload').value = '';
-      
-      setNotification({
-        show: true,
-        message: 'Document uploaded successfully',
-        type: 'success'
-      });
+      if (currentUser && currentUser.id) {
+        const response = await uploadStudentDocument(currentUser.id, formData);
+        
+        if (response && response.document) {
+          // Add the new document to the state
+          setDocuments([response.document, ...documents]);
+          
+          // Reset form
+          setSelectedFile(null);
+          setDocumentType('');
+          document.getElementById('file-upload').value = '';
+          
+          setNotification({
+            show: true,
+            message: 'Document uploaded successfully',
+            type: 'success'
+          });
+        } else {
+          throw new Error('Failed to upload document');
+        }
+      } else {
+        throw new Error('User information not available');
+      }
     } catch (err) {
       console.error('Error uploading document:', err);
       setNotification({
@@ -303,7 +306,7 @@ const DocumentUpload = () => {
       )}
       
       <div className="mt-8 text-sm text-gray-500">
-        Current Date and Time: 2025-03-05 18:59:47 UTC | User: GlitchZap
+        Current Date and Time: 2025-03-06 07:42:36 UTC | User: GlitchZap
       </div>
     </>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getStudentAcademicRecords } from '../../services/api';
 
 const AcademicRecords = () => {
   const { currentUser } = useAuth();
@@ -8,33 +9,20 @@ const AcademicRecords = () => {
   const [error, setError] = useState(null);
   
   // Current date and user information
-  const currentDateTime = "2025-03-05 18:52:18";
+  const currentDateTime = "2025-03-06 07:39:13";
   const currentUserLogin = "GlitchZap";
 
   useEffect(() => {
-    // Simulate API call with timeout
     const fetchAcademicRecords = async () => {
       try {
         setLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock academic records data
-        const mockRecords = [
-          { record_id: 1, subject: "Mathematics", year: 2024, semester: 1, marks: 85, grade: "A" },
-          { record_id: 2, subject: "Science", year: 2024, semester: 1, marks: 78, grade: "B+" },
-          { record_id: 3, subject: "English", year: 2024, semester: 1, marks: 92, grade: "A+" },
-          { record_id: 4, subject: "Social Studies", year: 2024, semester: 1, marks: 88, grade: "A" },
-          { record_id: 5, subject: "Hindi", year: 2024, semester: 1, marks: 90, grade: "A+" },
-          { record_id: 6, subject: "Mathematics", year: 2023, semester: 2, marks: 82, grade: "A-" },
-          { record_id: 7, subject: "Science", year: 2023, semester: 2, marks: 76, grade: "B" },
-          { record_id: 8, subject: "English", year: 2023, semester: 2, marks: 89, grade: "A" },
-          { record_id: 9, subject: "Social Studies", year: 2023, semester: 2, marks: 84, grade: "B+" },
-          { record_id: 10, subject: "Hindi", year: 2023, semester: 2, marks: 87, grade: "A" }
-        ];
-        
-        setAcademicRecords(mockRecords);
-        setError(null);
+        if (currentUser && currentUser.id) {
+          const records = await getStudentAcademicRecords(currentUser.id);
+          setAcademicRecords(records);
+          setError(null);
+        } else {
+          setError('User information not available');
+        }
       } catch (err) {
         console.error('Error fetching academic records:', err);
         setError('Failed to load academic records. Please try again later.');
@@ -44,7 +32,7 @@ const AcademicRecords = () => {
     };
 
     fetchAcademicRecords();
-  }, []);
+  }, [currentUser]);
 
   // Group records by year
   const recordsByYear = academicRecords.reduce((acc, record) => {
@@ -138,7 +126,7 @@ const AcademicRecords = () => {
       )}
       
       <div className="mt-8 text-sm text-gray-500">
-        Last updated: {currentDateTime}
+        Last updated: 2025-03-06 07:40:57
       </div>
     </>
   );

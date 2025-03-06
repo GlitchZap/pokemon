@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api'; // Replace with your actual API URL
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const API = axios.create({
   baseURL: API_BASE_URL,
@@ -21,71 +21,145 @@ API.interceptors.request.use(
 );
 
 // Authentication
-export const login = (credentials) => {
-  return API.post('/auth/login', credentials);
+export const login = async (credentials) => {
+  try {
+    const response = await API.post('/auth/login', credentials);
+    return response.data;
+  } catch (error) {
+    console.error('Login API Error:', error);
+    throw error;
+  }
 };
 
 // Student Profile
-export const getStudentProfile = (studentId) => {
-  return API.get(`/students/${studentId}`);
+export const getStudentProfile = async (studentId) => {
+  try {
+    const response = await API.get(`/students/${studentId}`);
+    return response.data.profile;
+  } catch (error) {
+    console.error('Get Student Profile API Error:', error);
+    throw error;
+  }
 };
 
 // Academic Records
-export const getStudentAcademicRecords = (studentId) => {
-  return API.get(`/students/${studentId}/academic-records`);
+export const getStudentAcademicRecords = async (studentId) => {
+  try {
+    const response = await API.get(`/students/${studentId}/academic-records`);
+    return response.data.academicRecords;
+  } catch (error) {
+    console.error('Get Academic Records API Error:', error);
+    throw error;
+  }
 };
 
 // Student Documents
-export const getStudentDocuments = (studentId) => {
-    return API.get(`/students/${studentId}/documents`);
-  };
-  
-  export const uploadStudentDocument = (studentId, formData) => {
-    return API.post(`/students/${studentId}/documents/upload`, formData, {
+export const getStudentDocuments = async (studentId) => {
+  try {
+    const response = await API.get(`/students/${studentId}/documents`);
+    return response.data.documents;
+  } catch (error) {
+    console.error('Get Documents API Error:', error);
+    throw error;
+  }
+};
+
+export const uploadStudentDocument = async (studentId, formData) => {
+  try {
+    const response = await API.post(`/students/${studentId}/documents/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-  };
-  
-  // Transfer Certificates
-  export const applyForTransferCertificate = (studentId, tcData) => {
-    return API.post(`/students/${studentId}/transfer-certificate`, tcData);
-  };
-  
-  export const getTransferCertificateStatus = (studentId) => {
-    return API.get(`/students/${studentId}/transfer-certificate`);
-  };
-  
-  // Scheme History
-  export const getStudentSchemeHistory = (studentId) => {
-    return API.get(`/students/${studentId}/schemes`);
-  };
-  
-  // Admin Endpoints
-  export const getAllStudents = () => {
-    return API.get('/admin/students');
-  };
-  
-  export const getStudentDetails = (studentId) => {
-    return API.get(`/admin/students/${studentId}`);
-  };
-  
-  export const getTransferCertificateRequests = () => {
-    return API.get('/admin/transfer-certificates');
-  };
-  
-  export const updateTransferCertificateStatus = (tcId, statusData) => {
-    return API.patch(`/admin/transfer-certificates/${tcId}`, statusData);
-  };
-  
-  // School Endpoints
-  export const getAllSchools = () => {
-    return API.get('/admin/schools');
-  };
-  
-  export const getSchoolDetails = (schoolId) => {
-    return API.get(`/admin/schools/${schoolId}`);
-  };
-  
-  export default API;
+    return response.data;
+  } catch (error) {
+    console.error('Upload Document API Error:', error);
+    throw error;
+  }
+};
+
+// Transfer Certificates
+export const applyForTransferCertificate = async (studentId, tcData) => {
+  try {
+    const response = await API.post(`/students/${studentId}/transfer-certificate`, tcData);
+    return response.data;
+  } catch (error) {
+    console.error('Apply Transfer Certificate API Error:', error);
+    throw error;
+  }
+};
+
+export const getTransferCertificateStatus = async (studentId) => {
+  try {
+    const response = await API.get(`/students/${studentId}/transfer-certificate`);
+    return response.data.transferCertificates;
+  } catch (error) {
+    console.error('Get Transfer Certificate Status API Error:', error);
+    throw error;
+  }
+};
+
+// Scheme History
+export const getStudentSchemeHistory = async (studentId) => {
+  try {
+    const response = await API.get(`/students/${studentId}/schemes`);
+    return response.data.schemes;
+  } catch (error) {
+    console.error('Get Scheme History API Error:', error);
+    throw error;
+  }
+};
+
+// Admin Endpoints
+export const getAllStudents = async () => {
+  try {
+    const response = await API.get('/admin/students');
+    return response.data.students;
+  } catch (error) {
+    console.error('Get All Students API Error:', error);
+    throw error;
+  }
+};
+
+export const getStudentDetails = async (studentId) => {
+  try {
+    const response = await API.get(`/students/${studentId}`);
+    return response.data.profile;
+  } catch (error) {
+    console.error('Get Student Details API Error:', error);
+    throw error;
+  }
+};
+
+export const getTransferCertificateRequests = async () => {
+  try {
+    const response = await API.get('/admin/transfer-certificates');
+    return response.data.transferCertificates;
+  } catch (error) {
+    console.error('Get Transfer Certificate Requests API Error:', error);
+    throw error;
+  }
+};
+
+export const updateTransferCertificateStatus = async (tcId, statusData) => {
+  try {
+    const response = await API.patch(`/admin/transfer-certificates/${tcId}`, statusData);
+    return response.data;
+  } catch (error) {
+    console.error('Update Transfer Certificate Status API Error:', error);
+    throw error;
+  }
+};
+
+// School Endpoints
+export const getAllSchools = async () => {
+  try {
+    const response = await API.get('/admin/schools');
+    return response.data.schools;
+  } catch (error) {
+    console.error('Get All Schools API Error:', error);
+    throw error;
+  }
+};
+
+export default API;

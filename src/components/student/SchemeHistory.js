@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getStudentSchemeHistory } from '../../services/api';
 
 const SchemeHistory = () => {
   const { currentUser } = useAuth();
@@ -8,47 +9,21 @@ const SchemeHistory = () => {
   const [error, setError] = useState(null);
   
   // Updated timestamp
-  const currentDateTime = "2025-03-05 18:59:47";
+  const currentDateTime = "2025-03-06 07:44:25";
   const currentUserLogin = "GlitchZap";
 
   useEffect(() => {
-    // Simulate API call with timeout
+    // Fetch scheme history from API
     const fetchSchemeHistory = async () => {
       try {
         setLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock schemes data
-        const mockSchemes = [
-          { 
-            history_id: 1, 
-            scheme_name: "PM Poshan (Mid-Day Meal)", 
-            start_date: "2024-06-01", 
-            end_date: null, 
-            benefits: "Daily nutritious meal", 
-            details: "National scheme for providing one hot cooked meal to school children"
-          },
-          { 
-            history_id: 2, 
-            scheme_name: "Digital Education Scheme", 
-            start_date: "2024-07-15", 
-            end_date: "2025-07-14", 
-            benefits: "Tablet device for digital learning", 
-            details: "Distribution of tablets to enhance digital learning capabilities"
-          },
-          { 
-            history_id: 3, 
-            scheme_name: "Scholarship for SC/ST students", 
-            start_date: "2023-09-01", 
-            end_date: "2024-08-31", 
-            benefits: "Financial assistance", 
-            details: "Monthly stipend for eligible SC/ST students to support educational expenses"
-          }
-        ];
-        
-        setSchemes(mockSchemes);
-        setError(null);
+        if (currentUser && currentUser.id) {
+          const schemesData = await getStudentSchemeHistory(currentUser.id);
+          setSchemes(schemesData || []);
+          setError(null);
+        } else {
+          setError('User information not available');
+        }
       } catch (err) {
         console.error('Error fetching scheme history:', err);
         setError('Failed to load scheme history. Please try again later.');
@@ -58,11 +33,11 @@ const SchemeHistory = () => {
     };
 
     fetchSchemeHistory();
-  }, []);
+  }, [currentUser]);
 
   const isSchemeActive = (startDate, endDate) => {
     const start = new Date(startDate);
-    const currentDate = new Date(currentDateTime);
+    const currentDate = new Date();
     const end = endDate ? new Date(endDate) : null;
     
     return start <= currentDate && (!end || currentDate <= end);
@@ -134,13 +109,13 @@ const SchemeHistory = () => {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Benefits</p>
-                          <p className="font-medium">{scheme.benefits}</p>
+                          <p className="font-medium">{scheme.benefits || 'Not specified'}</p>
                         </div>
                       </div>
                       
                       <div className="mt-4">
                         <p className="text-sm text-gray-500">Details</p>
-                        <p>{scheme.details}</p>
+                        <p>{scheme.details || 'No additional details available.'}</p>
                       </div>
                     </div>
                   </div>
@@ -162,7 +137,7 @@ const SchemeHistory = () => {
       </div>
       
       <div className="mt-8 text-sm text-gray-500">
-        Current Date and Time: 2025-03-05 18:59:47 UTC | User: GlitchZap
+        Current Date and Time: 2025-03-06 07:44:25 UTC | User: GlitchZap
       </div>
     </>
   );

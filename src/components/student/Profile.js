@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getStudentProfile } from '../../services/api';
 
 const Profile = () => {
   const { currentUser } = useAuth();
@@ -8,31 +9,20 @@ const Profile = () => {
   const [error, setError] = useState(null);
   
   // Current date and user information
-  const currentDateTime = "2025-03-05 18:52:18";
+  const currentDateTime = "2025-03-06 07:39:13";
   const currentUserLogin = "GlitchZap";
 
   useEffect(() => {
-    // Simulate API call with timeout
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock profile data
-        const mockProfile = {
-          student_id: "ST12345",
-          name: currentUserLogin,
-          aadhar_id: "9876 5432 1098",
-          dob: "2010-05-15",
-          contact_info: "+91 9876543210",
-          current_school_id: "SCH001",
-          school_name: "PM Shri Mahatma Gandhi Government School",
-          enrollment_date: "2022-06-15"
-        };
-        
-        setProfile(mockProfile);
-        setError(null);
+        if (currentUser && currentUser.id) {
+          const profileData = await getStudentProfile(currentUser.id);
+          setProfile(profileData);
+          setError(null);
+        } else {
+          setError('User information not available');
+        }
       } catch (err) {
         console.error('Error fetching profile:', err);
         setError('Failed to load profile data. Please try again later.');
@@ -42,7 +32,7 @@ const Profile = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [currentUser]);
 
   if (loading) {
     return (
@@ -56,6 +46,14 @@ const Profile = () => {
     return (
       <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
         <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+        <p>No profile information found.</p>
       </div>
     );
   }
@@ -81,10 +79,12 @@ const Profile = () => {
                 <p className="font-medium">{profile.name}</p>
               </div>
               
-              <div className="border-b pb-3">
-                <p className="text-sm text-gray-500 mb-1">Aadhar ID</p>
-                <p className="font-medium">{profile.aadhar_id}</p>
-              </div>
+              {profile.aadhar_id && (
+                <div className="border-b pb-3">
+                  <p className="text-sm text-gray-500 mb-1">Aadhar ID</p>
+                  <p className="font-medium">{profile.aadhar_id}</p>
+                </div>
+              )}
               
               <div className="border-b pb-3">
                 <p className="text-sm text-gray-500 mb-1">Date of Birth</p>
@@ -108,10 +108,12 @@ const Profile = () => {
                 <p className="font-medium">{profile.school_name}</p>
               </div>
               
-              <div className="border-b pb-3">
-                <p className="text-sm text-gray-500 mb-1">Enrollment Date</p>
-                <p className="font-medium">{new Date(profile.enrollment_date).toLocaleDateString()}</p>
-              </div>
+              {profile.enrollment_date && (
+                <div className="border-b pb-3">
+                  <p className="text-sm text-gray-500 mb-1">Enrollment Date</p>
+                  <p className="font-medium">{new Date(profile.enrollment_date).toLocaleDateString()}</p>
+                </div>
+              )}
             </div>
           </div>
           

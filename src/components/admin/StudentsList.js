@@ -1,54 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAllStudents } from '../../services/api';
 
 const StudentsList = () => {
-  // For demo purposes, we'll use mock data
-  const [students, setStudents] = useState([
-    {
-      student_id: 1001,
-      name: 'Rahul Kumar',
-      dob: '2010-05-15',
-      current_school_id: 501,
-      contact_info: '+91 9876543210'
-    },
-    {
-      student_id: 1002,
-      name: 'Priya Singh',
-      dob: '2011-03-22',
-      current_school_id: 501,
-      contact_info: '+91 9876543211'
-    },
-    {
-      student_id: 1003,
-      name: 'Amit Sharma',
-      dob: '2009-11-08',
-      current_school_id: 502,
-      contact_info: '+91 9876543212'
-    },
-    {
-      student_id: 1004,
-      name: 'Neha Patel',
-      dob: '2010-02-18',
-      current_school_id: 501,
-      contact_info: '+91 9876543213'
-    },
-    {
-      student_id: 1005,
-      name: 'Vikram Reddy',
-      dob: '2009-08-30',
-      current_school_id: 503,
-      contact_info: '+91 9876543214'
-    }
-  ]);
-
-  const [filteredStudents, setFilteredStudents] = useState(students);
-  const [loading, setLoading] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Current date and user information
-  const currentDateTime = "2025-03-05 19:25:53";
+  const currentDateTime = "2025-03-06 07:47:50";
   const currentUserLogin = "GlitchZap";
+
+  useEffect(() => {
+    // Fetch students from API
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const studentsData = await getAllStudents();
+        setStudents(studentsData || []);
+        setFilteredStudents(studentsData || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching students:', err);
+        setError('Failed to load students list. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -108,7 +91,7 @@ const StudentsList = () => {
             </div>
             
             <div className="flex space-x-2">
-              <button className="btn-outline flex items-center">
+            <button className="btn-outline flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
@@ -136,7 +119,7 @@ const StudentsList = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Birth</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -159,7 +142,7 @@ const StudentsList = () => {
                         <div className="text-sm text-gray-500">{new Date(student.dob).toLocaleDateString()}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{student.current_school_id}</div>
+                        <div className="text-sm text-gray-500">{student.school_name || `School ID: ${student.current_school_id}`}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">{student.contact_info}</div>
@@ -209,7 +192,7 @@ const StudentsList = () => {
       </div>
       
       <div className="mt-8 text-sm text-gray-500">
-        Last updated: {currentDateTime} | User: {currentUserLogin}
+        Current Date and Time: 2025-03-06 07:49:29 UTC | User: GlitchZap
       </div>
     </>
   );

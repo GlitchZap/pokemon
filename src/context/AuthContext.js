@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { login as apiLogin } from '../services/api';
+import { login as apiLogin } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -12,9 +12,9 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  
   // Current date and user information
-  const currentDateTime = "2025-03-05 18:38:46";
+  const currentDateTime = "2025-03-06 07:39:13";
   const currentUserLogin = "GlitchZap";
 
   useEffect(() => {
@@ -28,27 +28,32 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password, userType) => {
     try {
-      // In a real app, you'd call your API here
-      // For now, let's simulate a successful login
-      const user = {
-        id: 1,
-        name: currentUserLogin,
-        username: username,
-        userType: userType,
-        token: 'fake-jwt-token'
-      };
+      // Call the real API endpoint
+      const response = await apiLogin({ username, password, userType });
       
-      localStorage.setItem('authToken', user.token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setCurrentUser(user);
-      
-      if (userType === 'student') {
-        navigate('/student/dashboard');
-      } else if (userType === 'admin') {
-        navigate('/admin/dashboard');
+      if (response && response.user) {
+        const user = {
+          id: response.user.id,
+          name: response.user.name || currentUserLogin,
+          username: response.user.username,
+          userType: response.user.userType,
+          token: response.token
+        };
+        
+        localStorage.setItem('authToken', user.token);
+        localStorage.setItem('user', JSON.stringify(user));
+        setCurrentUser(user);
+        
+        if (user.userType === 'student') {
+          navigate('/student/dashboard');
+        } else if (user.userType === 'admin') {
+          navigate('/admin/dashboard');
+        }
+        
+        return true;
       }
       
-      return true;
+      return false;
     } catch (error) {
       console.error('Login error:', error);
       return false;
